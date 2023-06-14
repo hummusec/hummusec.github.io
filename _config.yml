@@ -18,14 +18,14 @@ timezone:
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
 # ↓ --------------------------
 
-title: The Hummus Bowl # the main title
+title: The Hummus Bowl
 
 tagline:
 
 description: 
 
 # fill in the protocol & hostname for your site, e.g., 'https://username.github.io'
-url: "https://hummus.cloud"
+url: 'https://hummus.cloud'
 
 github:
   username: hummusec # change to your github username
@@ -79,7 +79,7 @@ theme_mode: # [light|dark]
 img_cdn:
 
 # the avatar on sidebar, support local or CORS resources
-avatar: /assets/img/avatar.jpg
+avatar: '/assets/img/avatar.jpg'
 
 # boolean type, the global switch for TOC in posts.
 toc: true
