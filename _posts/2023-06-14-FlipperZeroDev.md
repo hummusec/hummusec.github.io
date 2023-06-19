@@ -1,6 +1,6 @@
 ---
 title: 'Crash Course: Your first Flipper Zero app'
-date: 2023-07-12 18:00:00 +0200
+date: 2023-06-18 18:00:00 +0200
 categories: [Flipper Zero]
 tags: [flipper_zero, development]
 ---
