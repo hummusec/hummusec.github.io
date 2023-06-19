@@ -7,4 +7,7 @@ render_with_liquid: false
 ---
 
 # Crash Course: Your first Flipper Zero app
-WIP
+
+## Introduction
+
+This tutorial will guide you through the process of creating your first Flipper Zero app. We will create a simple Hello World app that will be a good starting point for your future projects.
