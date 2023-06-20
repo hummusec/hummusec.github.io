@@ -85,7 +85,7 @@ We will also need to create an icon for our app. The icon will be displayed in t
 
 It needs to be 10x10 pixels, 1-bit color depth, PNG format. Like this:
 
-![Hi_10x10.png](assets/img/attachments/2023-06-14-FlipperZeroDev.md/Hi_10x10.png)
+![Hi_10x10.png](/assets/img/attachments/2023-06-14-FlipperZeroDev.md/Hi_10x10.png)
 
 
 
