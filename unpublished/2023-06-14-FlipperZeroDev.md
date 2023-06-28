@@ -7,13 +7,14 @@ tags: [flipper_zero, development]
 
 # Introduction
 
-This tutorial will guide you through the process of creating your first Flipper Zero app. We will create a simple Hello World app that will be a good starting point for your future projects on the Flipper Zero.
+This tutorial will guide you through the process of creating your first Flipper Zero app. We will create a simple Hello World app with a Scene Manager that will be a good starting point for your future projects on the Flipper Zero.
 
 We will take a look at how to setup the development environment, how to create a new app package from scratch, and how to build & deploy it to your Flipper Zero device.
 
 # Preparing the development environment
 
 Before getting started with developing the we need to setup our development environment.
+If you already have a working development environment, and know how to use `./fbt`, you can safely skip this section and jump straight to [Creating a new Flipper Application Package](#creating-a-new-flipper-application-package).
 
 ## Getting the Flipper Zero firmware
 
@@ -33,11 +34,13 @@ cd flipperzero-firmware
 ./fbt
 ```
 
-## (Optional) Installing Visual Studio Code environment
+## Installing Visual Studio Code environment
 After the process has completed, we will run `./fbt` again to deploy the Visual Studio Code environment to our `flipperzero-firmware` directory.
 ```bash
 ./fbt vscode_dist
 ```
+
+Now we can open the `flipperzero-firmware` directory in Visual Studio Code and start developing our app.
 
 # Creating a new Flipper Application Package
 
@@ -87,6 +90,80 @@ It needs to be 10x10 pixels, 1-bit color depth, PNG format. Like this:
 
 ![Hi_10x10.png](/assets/img/attachments/2023-06-14-FlipperZeroDev.md/Hi_10x10.png)
 
+# Scene Manager
+
+A Scene Manager is a class that manages the scenes of your application. It is responsible for creating, navigating between, and destroying scenes.
+
+Not only that it is easier to manage and navigate between scenes using a Scene Manager, but it also allows you to reuse a collection of components and you don't need to re-invent the wheel. These components include:
+
+- Buttons
+- Menus / Submenus
+- File Input
+- Text Inputs
+- Loading screens
+- Widget components (like text labels, scroll-box, frame, icon, etc.)
+- And more...
+
+There are some disadvantages to using a Scene Manager, it is overkill for simpler applications (use something called "View Port" instead), and it is not very well documented (like most of the Flipper Zero firmware).
+
+
+
+## Scene Callbacks
+
+For each one of our scenes, we will need to create 3 callback functions:
+
+
+
+
+# View Dispatcher
+
+
+First we will define an enum that will contain the names of all our scenes:
+```c
+typedef enum {
+    AppSceneMenu,
+    AppSceneHello,
+    AppSceneWorld,
+    AppSceneCount // This is not a scene, it is used to count the number of scenes
+} appScene;
+```
+
+Then we will define an enum that will contain the names of all our views:
+```c
+typedef enum {
+    AppViewKnob,
+    AppViewWidget
+} appViews;
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Creating a Scene Manager
+
+## File structure
+
+So far you should have a directory structure like this:
+
+```
+applications_user/
+└── hello_world/
+    ├── application.fam
+    └── icons/
+        └── Hi_10x10.png
+```
 
 
 
@@ -106,3 +183,11 @@ applications_user/
         └── 
     
 ```
+
+
+# References / Additional Links
+
+## Flipper Zero - Creating UI using Scenes
+
+Video tutorial series by Derek Jamison on how to create UI using Scenes.
+[Flipper Zero - Part 1 - Creating UI using Scenes](https://www.youtube.com/watch?v=YbskaB6caqk)

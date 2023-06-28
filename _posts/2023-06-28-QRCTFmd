@@ -1,0 +1,163 @@
+---
+title: 'The dog ate my QR! - Bsides TLV 2023 CTF'
+date: 2023-06-18 18:00:00 +0200
+categories: [CTF]
+tags: [writeup, bsides2023, ctf]
+---
+
+# The dog ate my QR! 🐶
+
+![qr_ctf_1](/assets/img/attachments/2023-06-28-QRCTF.md/qr_ctf_1.png)
+
+>[!info] 
+>**Oh no!** The dog ate my QR code!
+>Can you help me decode it?
+
+# The basic structure of QR codes
+
+Before looking at the challenge itself, we will take a closer look on how QR codes are made.
+
+The scheme below refers to the different elements that make up a QR code:
+
+![qr_ctf_2](/assets/img/attachments/2023-06-28-QRCTF.md/qr_ctf_2.png)
+
+### How is the data stored on a QR code?
+
+Data bits are read starting from the lower-right corner and moving up the two right-hand columns in a zig-zag pattern.
+
+The QR code uses an algorithm called "Solomon-Reed" which is a powerful error correction technique to ensure reliable data retrieval even if some of the data blocks are missing / damaged.
+
+By adding redundant information to the QR code, the algorithm allows for the recovery of corrupted or missing data.
+
+![qr_ctf_3](/assets/img/attachments/2023-06-28-QRCTF.md/qr_ctf_3.png)
+
+This robust error correction mechanism enables QR codes to withstand various forms of damage or distortion, ensuring accurate scanning and reliable data retrieval even under challenging conditions.
+
+We can use this information to assume that the QR code that we have in our possession might already have all the data blocks in order to successfully recover the data.
+
+# `Dog.png`
+
+So if we have all the necessary data, why is this QR code still not scannable?
+So in order to answer that question we need to asses the image and dissect it to each of the QR's elements.
+
+### Pre-processing the QR code image
+
+Before we try to decode and perform additional manipulation on the the image, let's perform a quick edit to the picture and clear the excess image data while recovering some of the missing modules (the bits that make up the QR code) from the bite-mark.
+
+The rest of the bits that we are not sure about we will mark them with an alternate color.
+
+![qr_ctf_4](/assets/img/attachments/2023-06-28-QRCTF.md/qr_ctf_4.png)
+
+### QR Elements
+If you pay close inspection on the QR code itself, you will be able to tell that some of the individual elements that make up the QR code.
+
+	✅   Position Detection Patterns
+	❌   Alignment Pattern
+	✅   Timing Patterns
+	✅   Version Information
+	❌   Format Information
+
+
+![qr_ctf_5](/assets/img/attachments/2023-06-28-QRCTF.md/qr_ctf_5.png)
+
+
+### Alignment Pattern
+We know that the Alignment Pattern is static and used for helping the scanner to align the picture for decoding, so we can add this element to the image before moving on to the next missing element.
+
+![qr_ctf_6](/assets/img/attachments/2023-06-28-QRCTF.md/qr_ctf_6.png)
+
+
+
+# Generating the format information
+
+The 15-bit long format information encodes information about the error correction level (four possible: L, M, Q, and H) and which mask pattern (eight possible) are in use in the QR code. 
+
+The image below shows which bits are used to represent the format string bits:
+
+![qr_ctf_7](/assets/img/attachments/2023-06-28-QRCTF.md/qr_ctf_7.png)
+
+There are `4*8 = 32` possible combinations in total for a format information string. 
+
+If the format information string is missing, one can simply iterate over all the possible combinations and attempt to decode the QR code with each combination of bits.
+
+When the right combination is found, we will retrieve the human-readable flag. 
+
+
+## `solver.py`
+
+We can write a simple program in Python using the library 'Pillow' that will help us generate images of all the combinations of the format string information in the QR image.
+
+
+```python
+from PIL import Image, ImageDraw
+
+possible_combinations_of_bits = [
+    '111011111000100', '111001011110011', '111110110101010',
+    '111100010011101', '110011000101111', '110001100011000',
+    '110110001000001', '110100101110110', '101010000010010',
+    '101000100100101', '101111001111100', '101101101001011',
+    '100010111111001', '100000011001110', '100111110010111',
+    '100101010100000', '011010101011111', '011000001101000',
+    '011111100110001', '011101000000110', '010010010110100',
+    '010000110000011', '010111011011010', '010101111101101',
+    '001011010001001', '001001110111110', '001110011100111',
+    '001100111010000', '000011101100010', '000001001010101',
+    '000110100001100', '000100000111011'
+]
+
+module_size = 20
+
+# A dict that supplies the coordinations for the bits in a format information string.
+bit_coords = {
+    'bit_0': [(80, 240), (240,720)],
+    'bit_1': [(100, 240), (240,700)],
+    'bit_2': [(120, 240), (240,680)],
+    'bit_3': [(140, 240), (240,660)],
+    'bit_4': [(160, 240), (240,640)],
+    'bit_5': [(180, 240), (240,620)],
+    'bit_6': [(220, 240), (240,600)],
+    'bit_7': [(240, 240), (580,240)],
+    'bit_8': [(240, 220), (600,240)],
+    'bit_9': [(240, 180), (620,240)],
+    'bit_10': [(240, 160), (640,240)],
+    'bit_11': [(240, 140), (660,240)],
+    'bit_12': [(240, 120), (680,240)],
+    'bit_13': [(240, 100), (700,240)],
+    'bit_14': [(240, 80), (720,240)],
+}
+
+
+# Load original image
+with open('DogProcessed.png', 'rb') as f:
+    img = Image.open(f)
+    img = img.convert('RGB')
+
+
+# Generate PNGs of all possible QR codes
+for combination in possible_combinations_of_bits:
+    # Create a copy of the original image
+    new_img = img.copy()
+
+    # Iterate over each bit in the code
+    for i, bit in enumerate(combination):
+        # If the bit is 1, color the corresponding square black
+        if bit == '1':
+            for x in range(module_size):
+                for y in range(module_size):
+                    for coord in bit_coords[f'bit_{i}']:
+                        new_img.putpixel((coord[0] + x, coord[1] + y), (0,0,0))
+
+    # Save the image
+    new_img.save(f'qr_codes/qr_code_{code}.png')
+
+```
+
+After running this script, we will get all the generated images with all the possible bit combinations and we can start scanning them one by one.
+
+![qr_ctf_8](/assets/img/attachments/2023-06-28-QRCTF.md/qr_ctf_8.png)
+
+# Solution
+
+While scanning the resultant images one-by-one, at the moment you scan the file `qr_code_010101111101101.png` then you will be able to decode the QR into the flag text: `BSidesTLV2023{BE_THERE_QR_BE_SQUARE!}`
+
+![qr_ctf_9](/assets/img/attachments/2023-06-28-QRCTF.md/qr_ctf_9.png)
